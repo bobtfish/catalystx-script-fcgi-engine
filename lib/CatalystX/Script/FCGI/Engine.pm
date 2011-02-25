@@ -3,7 +3,7 @@ use Moose;
 use FCGI::Engine;
 use namespace::autoclean;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 extends 'Catalyst::Script::FastCGI';
 
@@ -13,15 +13,17 @@ has '+manager' => (
 
 sub _run_application {
     my $self = shift;
-    my ($listen, $args) = $self->application_args;
+    my ($listen, $args) = $self->_application_args;
     Class::MOP::load_class($self->application_name);
     my @detach = delete($args->{detach}) ? ( detach => 1 ) : ();
+    my @listen = $listen ? (listen => $listen, use_manager => 1) : ();
+    $args->{nproc} ||= 5;
+    delete($args->{pidfile}) unless $args->{pidfile};
     FCGI::Engine->new(
         handler_class => $self->application_name,
         handler_method => 'run',
         pre_fork_init => sub {},
-        ($listen ? (use_manager => 1) : ()),
-        listen => $listen,
+        @listen,
         @detach,
         %$args,
     )->run;
