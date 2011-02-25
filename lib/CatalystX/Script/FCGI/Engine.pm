@@ -3,7 +3,7 @@ use Moose;
 use FCGI::Engine;
 use namespace::autoclean;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 extends 'Catalyst::Script::FastCGI';
 
